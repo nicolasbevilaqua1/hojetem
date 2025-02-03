@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hoje Tem?</title>
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- Bibliotecas do MediaPipe -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils"></script>
+    <script src="https://cdn.jsdelivr.net/npm/howler"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Raleway:wght@300&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div id="overlay">
+        <h1>Hoje tem?</h1>
+
+        <div id="video-container">
+            <video id="video" autoplay playsinline></video>
+            <canvas id="output"></canvas>
+        </div>
+
+        <div id="info-container">
+            <div id="angle-display">Índice de Sorriso: 0.00</div>
+        </div>
+
+        <div id="controls">
+            <button id="reset-btn">Resetar</button>
+            <button id="close-camera-btn">Fechar Câmera</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+
+</body>
+</html>

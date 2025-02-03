@@ -7,6 +7,7 @@ const closeCameraButton = document.getElementById("close-camera-btn");
 
 let lastSmileTime = 0; // Tempo do último sorriso detectado
 const smileDelay = 3000; // Delay aumentado para 3 segundos
+const scanInterval = 2000; // **Leitura apenas a cada 2 segundos**
 
 // Configuração do som de alerta
 const alertSound = new Howl({
@@ -40,12 +41,22 @@ function getSmileMessage(smileRatio) {
     }
 }
 
-// Desenha landmarks faciais e detecta sorriso com delay
-function drawLandmarks(results) {
+// Variável para armazenar os últimos resultados do MediaPipe
+let latestResults = null;
+
+// Salva os resultados para serem processados a cada 2 segundos
+function onResults(results) {
+    latestResults = results; // Apenas armazena os resultados
+}
+
+// Desenha landmarks faciais e detecta sorriso a cada 2 segundos
+function processSmileDetection() {
+    if (!latestResults) return; // Se não houver resultados ainda, não faz nada
+
     canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
 
-    if (results.multiFaceLandmarks) {
-        for (const landmarks of results.multiFaceLandmarks) {
+    if (latestResults.multiFaceLandmarks) {
+        for (const landmarks of latestResults.multiFaceLandmarks) {
             const pTopLip = toCanvasCoords(landmarks[13]);
             const pBottomLip = toCanvasCoords(landmarks[14]);
             const pLeftMouth = toCanvasCoords(landmarks[308]);
@@ -72,8 +83,7 @@ function drawLandmarks(results) {
             }
 
             // Atualiza a exibição
-            angleDisplay.innerHTML = `Índice de Sorriso: ${smileRatio.toFixed(2)} <br> ${getSmileMessage(smileRatio)}`;
-
+            angleDisplay.innerHTML = `Índice de Sorriso: ${smileRatio.toFixed(2)}<br>${getSmileMessage(smileRatio)}`;
         }
     }
 }
@@ -81,8 +91,11 @@ function drawLandmarks(results) {
 // Configuração do MediaPipe FaceMesh
 const faceMesh = new FaceMesh({ locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}` });
 faceMesh.setOptions({ maxNumFaces: 1, refineLandmarks: true, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5 });
-faceMesh.onResults(drawLandmarks);
+faceMesh.onResults(onResults); // Apenas armazena os resultados
 
-// Iniciar câmera
+// Inicia a câmera
 const camera = new Camera(videoElement, { onFrame: async () => { await faceMesh.send({ image: videoElement }); }, width: 640, height: 480 });
 camera.start();
+
+// **Chama a função de detecção a cada 2 segundos**
+setInterval(processSmileDetection, scanInterval);
